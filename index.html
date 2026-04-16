@@ -81,6 +81,12 @@
             transition: width 0.2s, height 0.2s;
         }
 
+        /* Mobile Cursor Override */
+        @media (max-width: 768px) {
+            body { cursor: auto; }
+            .cursor-dot, .cursor-outline { display: none; }
+        }
+
         /* Loading Screen */
         .loader {
             position: fixed;
@@ -100,6 +106,10 @@
             letter-spacing: 2px;
         }
 
+        @media (max-width: 640px) {
+            .loader-text { font-size: 1.2rem; }
+        }
+
         .loader-bar {
             width: 200px;
             height: 2px;
@@ -107,6 +117,10 @@
             margin-top: 20px;
             position: relative;
             overflow: hidden;
+        }
+
+        @media (max-width: 640px) {
+            .loader-bar { width: 150px; }
         }
 
         .loader-progress {
@@ -120,9 +134,9 @@
 
         /* Glassmorphism */
         .glass-panel {
-            background: var(--glass);
+            background: rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(16px);
-            border: 1px solid var(--glass-border);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         /* Typography */
@@ -130,16 +144,68 @@
             text-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
         }
 
-        /* Image Masking */
-        .mask-image-clip {
-            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
-        }
-
         /* Image Fallback Styling */
         .product-img {
             background-color: #111;
-            /* Dark placeholder bg while loading */
             transition: transform 0.7s ease;
+        }
+
+        /* Mobile Navigation */
+        .mobile-menu {
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .mobile-menu.active {
+            transform: translateX(0);
+        }
+
+        /* Enhanced Hover Effects */
+        .hover-lift {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .hover-lift:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 255, 163, 0.1);
+        }
+
+        /* Smooth Scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Elite Pro Animations */
+        .fade-in-up {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in-up.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Enhanced Modal for Mobile */
+        @media (max-width: 768px) {
+            .modal-content {
+                margin: 1rem;
+                max-height: 90vh;
+                overflow-y: auto;
+            }
+        }
+
+        /* Fix for filter buttons */
+        .filter-btn.active {
+            background-color: #00ffa3;
+            color: #000;
+            border-color: rgba(0, 255, 163, 0.3);
+        }
+
+        /* Ensure proper spacing */
+        .hero-zoom-img {
+            transform: scale(1.1);
         }
     </style>
 </head>
@@ -159,28 +225,54 @@
     </div>
 
     <!-- Navigation -->
-    <nav class="fixed top-0 w-full z-50 px-6 py-6 transition-all duration-300" id="navbar">
-        <div class="max-w-7xl mx-auto flex justify-between items-center glass-panel rounded-full px-8 py-4">
+    <nav class="fixed top-0 w-full z-50 px-4 md:px-6 py-4 md:py-6 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto flex justify-between items-center glass-panel rounded-full px-4 md:px-8 py-3 md:py-4">
             <a href="#" class="flex items-center gap-2 group">
-                <i
-                    class="fa-solid fa-microchip text-surgeon text-2xl group-hover:rotate-180 transition-transform duration-700"></i>
+                <i class="fa-solid fa-microchip text-surgeon text-xl md:text-2xl group-hover:rotate-180 transition-transform duration-700"></i>
                 <div class="flex flex-col">
-                    <span class="font-display font-bold text-xl tracking-tighter leading-none">OSMOTECH</span>
-                    <span class="text-[10px] text-gray-400 tracking-[0.2em] uppercase">î-Surgeon</span>
+                    <span class="font-display font-bold text-lg md:text-xl tracking-tighter leading-none">OSMOTECH</span>
+                    <span class="text-[8px] md:text-[10px] text-gray-400 tracking-[0.2em] uppercase">î-Surgeon</span>
                 </div>
             </a>
 
-            <div class="hidden md:flex gap-8 text-sm font-medium text-gray-300">
+            <!-- Desktop Menu -->
+            <div class="hidden md:flex gap-6 lg:gap-8 text-sm font-medium text-gray-300">
                 <a href="#services" class="hover:text-surgeon transition-colors">Surgery</a>
                 <a href="#inventory" class="hover:text-surgeon transition-colors">Inventory</a>
                 <a href="#trade" class="hover:text-surgeon transition-colors">Trade-In</a>
                 <a href="#contact" class="hover:text-surgeon transition-colors">Contact</a>
             </div>
 
-            <a href="mailto:uhammed666@gmail.com"
-                class="hidden md:block bg-surgeon text-black px-6 py-2 rounded-full font-bold text-sm hover:bg-white transition-colors">
+            <!-- Desktop CTA -->
+            <a href="mailto:uhammed666@gmail.com" class="hidden md:block bg-surgeon text-black px-4 lg:px-6 py-2 rounded-full font-bold text-xs lg:text-sm hover:bg-white transition-colors">
                 Book Repair
             </a>
+
+            <!-- Mobile Menu Button -->
+            <button class="md:hidden w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all" id="mobileMenuBtn">
+                <i class="fa-solid fa-bars text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div class="mobile-menu fixed top-0 right-0 h-full w-80 bg-black/95 backdrop-blur-xl border-l border-white/10 md:hidden" id="mobileMenu">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-8">
+                    <span class="font-display font-bold text-xl text-surgeon">Menu</span>
+                    <button class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center" id="closeMobileMenu">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                <nav class="space-y-6">
+                    <a href="#services" class="block text-lg font-medium text-gray-300 hover:text-surgeon transition-colors">Surgery</a>
+                    <a href="#inventory" class="block text-lg font-medium text-gray-300 hover:text-surgeon transition-colors">Inventory</a>
+                    <a href="#trade" class="block text-lg font-medium text-gray-300 hover:text-surgeon transition-colors">Trade-In</a>
+                    <a href="#contact" class="block text-lg font-medium text-gray-300 hover:text-surgeon transition-colors">Contact</a>
+                    <a href="mailto:uhammed666@gmail.com" class="block bg-surgeon text-black px-6 py-3 rounded-full font-bold text-center mt-8 hover:bg-white transition-colors">
+                        Book Repair
+                    </a>
+                </nav>
+            </div>
         </div>
     </nav>
 
@@ -195,186 +287,152 @@
 
         <div class="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent z-10"></div>
 
-        <div class="relative z-20 text-center px-4 max-w-4xl hero-content">
-            <div
-                class="inline-block border border-surgeon/30 text-surgeon px-4 py-1 rounded-full text-xs font-bold tracking-widest mb-6 uppercase backdrop-blur-md">
+        <div class="relative z-20 text-center px-4 md:px-6 max-w-4xl hero-content">
+            <div class="inline-block border border-surgeon/30 text-surgeon px-3 md:px-4 py-1 rounded-full text-xs font-bold tracking-widest mb-4 md:mb-6 uppercase backdrop-blur-md">
                 Micro-Soldering Specialists
             </div>
-            <h1 class="font-display text-6xl md:text-8xl font-bold leading-tight mb-6">
+            <h1 class="font-display text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold leading-tight mb-4 md:mb-6">
                 WE RESURRECT <br>
-                <span
-                    class="text-transparent bg-clip-text bg-gradient-to-r from-surgeon to-white text-glow">TECHNOLOGY</span>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-surgeon to-white text-glow">TECHNOLOGY</span>
             </h1>
-            <p class="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
-                Premium iPhone & Laptop surgery in Ibadan. From Baseband repair to Face ID restoration. We don't just
-                fix; we engineer.
+            <p class="text-gray-400 text-base md:text-lg lg:text-xl mb-8 md:mb-10 max-w-2xl mx-auto leading-relaxed px-4">
+                Premium iPhone & Laptop surgery in Ibadan. From Baseband repair to Face ID restoration. We don't just fix; we engineer.
             </p>
-            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
-                <a href="#inventory"
-                    class="bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform">
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center px-4">
+                <a href="#inventory" class="w-full sm:w-auto bg-white text-black px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:scale-105 transition-transform text-center">
                     Shop Apple Gear
                 </a>
-                <a href="#services"
-                    class="glass-panel text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-surgeon/10 hover:border-surgeon transition-all flex items-center gap-2">
-                    <i class="fa-solid fa-stethoscope"></i> View Surgical Services
+                <a href="#services" class="w-full sm:w-auto glass-panel text-white px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-base md:text-lg hover:bg-surgeon/10 hover:border-surgeon transition-all flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-stethoscope"></i> <span class="hidden sm:inline">View Surgical</span> Services
                 </a>
             </div>
         </div>
 
-        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce">
-            <i class="fa-solid fa-chevron-down text-surgeon text-xl"></i>
+        <div class="absolute bottom-6 md:bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+            <i class="fa-solid fa-chevron-down text-surgeon text-lg md:text-xl"></i>
         </div>
     </header>
 
     <!-- SERVICES -->
-    <section id="services" class="py-24 bg-void relative">
+    <section id="services" class="py-16 md:py-24 bg-void relative">
         <div class="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-[0.05] pointer-events-none"></div>
 
-        <div class="max-w-7xl mx-auto px-6 relative z-10">
-            <div class="flex flex-col md:flex-row justify-between items-end mb-16">
-                <div>
-                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Precision <span
-                            class="text-surgeon">Surgery</span></h2>
-                    <p class="text-gray-400 max-w-lg">Hardware-level repairs for "unfixable" devices. Using
-                        professional-grade microscopes and soldering stations.</p>
+        <div class="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end mb-12 md:mb-16 gap-6">
+                <div class="text-center lg:text-left">
+                    <h2 class="font-display text-3xl md:text-4xl lg:text-5xl font-bold mb-4">Precision <span class="text-surgeon">Surgery</span></h2>
+                    <p class="text-gray-400 max-w-lg mx-auto lg:mx-0">Hardware-level repairs for "unfixable" devices. Using professional-grade microscopes and soldering stations.</p>
                 </div>
-                <a href="#contact"
-                    class="text-surgeon underline underline-offset-4 decoration-surgeon/30 hover:decoration-surgeon transition-all">Diagnostics
-                    Available &rarr;</a>
+                <a href="#contact" class="text-surgeon underline underline-offset-4 decoration-surgeon/30 hover:decoration-surgeon transition-all text-center lg:text-right">
+                    Diagnostics Available &rarr;
+                </a>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
                 <!-- Service 1 -->
-                <div
-                    class="glass-panel p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden">
+                <div class="glass-panel p-6 md:p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden hover-lift">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fa-solid fa-fingerprint text-8xl"></i>
+                        <i class="fa-solid fa-fingerprint text-6xl md:text-8xl"></i>
                     </div>
-                    <div
-                        class="w-14 h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-6 text-surgeon text-2xl group-hover:scale-110 transition-transform">
+                    <div class="w-12 h-12 md:w-14 md:h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-surgeon text-xl md:text-2xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-fingerprint"></i>
                     </div>
-                    <h3 class="font-display text-2xl font-bold mb-3">Face ID Repair</h3>
+                    <h3 class="font-display text-xl md:text-2xl font-bold mb-3">Face ID Repair</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-4">
-                        Dot projector flex cable replacement and True Camera module restoration. Restore biometric
-                        security with OEM precision.
+                        Dot projector flex cable replacement and True Camera module restoration. Restore biometric security with OEM precision.
                     </p>
-                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY:
-                        HIGH</span>
+                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY: HIGH</span>
                 </div>
 
                 <!-- Service 2 -->
-                <div
-                    class="glass-panel p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden">
+                <div class="glass-panel p-6 md:p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden hover-lift">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fa-solid fa-wifi text-8xl"></i>
+                        <i class="fa-solid fa-wifi text-6xl md:text-8xl"></i>
                     </div>
-                    <div
-                        class="w-14 h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-6 text-surgeon text-2xl group-hover:scale-110 transition-transform">
+                    <div class="w-12 h-12 md:w-14 md:h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-surgeon text-xl md:text-2xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-wifi"></i>
                     </div>
-                    <h3 class="font-display text-2xl font-bold mb-3">Baseband Fix</h3>
+                    <h3 class="font-display text-xl md:text-2xl font-bold mb-3">Baseband Fix</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-4">
-                        No Signal? IMEI null? We perform CPU-level jumper work and Baseband IC replacements to restore
-                        cellular connectivity.
+                        No Signal? IMEI null? We perform CPU-level jumper work and Baseband IC replacements to restore cellular connectivity.
                     </p>
-                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY:
-                        EXPERT</span>
+                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY: EXPERT</span>
                 </div>
 
                 <!-- Service 3 -->
-                <div
-                    class="glass-panel p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden">
+                <div class="glass-panel p-6 md:p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden hover-lift md:col-span-2 lg:col-span-1">
                     <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                        <i class="fa-solid fa-bolt text-8xl"></i>
+                        <i class="fa-solid fa-bolt text-6xl md:text-8xl"></i>
                     </div>
-                    <div
-                        class="w-14 h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-6 text-surgeon text-2xl group-hover:scale-110 transition-transform">
+                    <div class="w-12 h-12 md:w-14 md:h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-4 md:mb-6 text-surgeon text-xl md:text-2xl group-hover:scale-110 transition-transform">
                         <i class="fa-solid fa-bolt"></i>
                     </div>
-                    <h3 class="font-display text-2xl font-bold mb-3">Tristar / Charging IC</h3>
+                    <h3 class="font-display text-xl md:text-2xl font-bold mb-3">Tristar / Charging IC</h3>
                     <p class="text-gray-400 text-sm leading-relaxed mb-4">
-                        Sudden battery drain? Not charging? We replace the Tristar and Tigris power management chips
-                        directly on the logic board.
+                        Sudden battery drain? Not charging? We replace the Tristar and Tigris power management chips directly on the logic board.
                     </p>
-                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY:
-                        MEDIUM</span>
+                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY: MEDIUM</span>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- INVENTORY (Elite Image System) -->
-    <section id="inventory" class="py-24 bg-[#080808]">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16">
-                <span class="text-surgeon font-mono text-sm tracking-widest uppercase">Certified Pre-Owned & New</span>
-                <h2 class="font-display text-4xl md:text-5xl font-bold mt-2">The Arsenal</h2>
+    <section id="inventory" class="py-16 md:py-24 bg-[#080808]">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
+            <div class="text-center mb-12 md:mb-16">
+                <span class="text-surgeon font-mono text-xs md:text-sm tracking-widest uppercase">Certified Pre-Owned & New</span>
+                <h2 class="font-display text-3xl md:text-4xl lg:text-5xl font-bold mt-2">The Arsenal</h2>
             </div>
 
             <!-- Filters -->
-            <div class="flex flex-wrap justify-center gap-4 mb-12" id="filters">
-                <button
-                    class="filter-btn active px-6 py-2 rounded-full border border-surgeon/30 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
-                    data-filter="all">All Devices</button>
-                <button
-                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
-                    data-filter="iphone">iPhone</button>
-                <button
-                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
-                    data-filter="macbook">MacBook</button>
-                <button
-                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
-                    data-filter="ipad">iPad</button>
-                <button
-                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
-                    data-filter="watch">Watch</button>
+            <div class="flex flex-wrap justify-center gap-2 md:gap-4 mb-8 md:mb-12 px-4" id="filters">
+                <button class="filter-btn active px-4 md:px-6 py-2 rounded-full border border-surgeon/30 text-xs md:text-sm font-bold hover:bg-surgeon hover:text-black transition-all" data-filter="all">All Devices</button>
+                <button class="filter-btn px-4 md:px-6 py-2 rounded-full border border-white/10 text-xs md:text-sm font-bold hover:bg-surgeon hover:text-black transition-all" data-filter="iphone">iPhone</button>
+                <button class="filter-btn px-4 md:px-6 py-2 rounded-full border border-white/10 text-xs md:text-sm font-bold hover:bg-surgeon hover:text-black transition-all" data-filter="macbook">MacBook</button>
+                <button class="filter-btn px-4 md:px-6 py-2 rounded-full border border-white/10 text-xs md:text-sm font-bold hover:bg-surgeon hover:text-black transition-all" data-filter="ipad">iPad</button>
+                <button class="filter-btn px-4 md:px-6 py-2 rounded-full border border-white/10 text-xs md:text-sm font-bold hover:bg-surgeon hover:text-black transition-all" data-filter="watch">Watch</button>
             </div>
 
             <!-- Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="product-grid">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6" id="product-grid">
                 <!-- Products injected via JS -->
             </div>
         </div>
     </section>
 
     <!-- QUICK VIEW MODAL -->
-    <div id="quickViewModal"
-        class="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] hidden items-center justify-center px-6">
-        <div
-            class="bg-[#0b0b0b] border border-white/10 rounded-3xl max-w-4xl w-full overflow-hidden relative shadow-2xl">
+    <div id="quickViewModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] hidden items-center justify-center px-4 md:px-6">
+        <div class="modal-content bg-[#0b0b0b] border border-white/10 rounded-3xl max-w-4xl w-full overflow-hidden relative shadow-2xl">
 
             <!-- CLOSE -->
-            <button id="closeModal"
-                class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-surgeon hover:text-black transition-all flex items-center justify-center">
+            <button id="closeModal" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-surgeon hover:text-black transition-all flex items-center justify-center">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
             <div class="grid grid-cols-1 md:grid-cols-2">
 
                 <!-- IMAGE -->
-                <div class="h-[500px] overflow-hidden">
+                <div class="h-64 md:h-[500px] overflow-hidden">
                     <img id="modalImage" src="" alt="" class="w-full h-full object-cover">
                 </div>
 
                 <!-- DETAILS -->
-                <div class="p-8 flex flex-col justify-center">
-                    <span class="text-surgeon text-xs font-bold tracking-widest uppercase mb-2"
-                        id="modalCategory"></span>
+                <div class="p-6 md:p-8 flex flex-col justify-center">
+                    <span class="text-surgeon text-xs font-bold tracking-widest uppercase mb-2" id="modalCategory"></span>
 
-                    <h2 id="modalTitle" class="font-display text-4xl font-bold mb-4"></h2>
+                    <h2 id="modalTitle" class="font-display text-2xl md:text-4xl font-bold mb-4"></h2>
 
-                    <p id="modalPrice" class="text-2xl font-mono text-gray-300 mb-6"></p>
+                    <p id="modalPrice" class="text-xl md:text-2xl font-mono text-gray-300 mb-4 md:mb-6"></p>
 
-                    <p id="modalDescription" class="text-gray-400 leading-relaxed mb-6"></p>
+                    <p id="modalDescription" class="text-gray-400 leading-relaxed mb-4 md:mb-6 text-sm md:text-base"></p>
 
-                    <div>
-                        <h4 class="font-bold mb-4 text-white">Key Functionalities</h4>
-                        <ul id="modalFeatures" class="space-y-3 text-sm text-gray-300"></ul>
+                    <div class="mb-6 md:mb-8">
+                        <h4 class="font-bold mb-3 md:mb-4 text-white text-sm md:text-base">Key Functionalities</h4>
+                        <ul id="modalFeatures" class="space-y-2 md:space-y-3 text-xs md:text-sm text-gray-300"></ul>
                     </div>
 
-                    <button onclick="buyProduct('${p.name}')"
-                        class="mt-8 bg-surgeon text-black font-bold py-4 rounded-full hover:scale-105 transition-transform">
+                    <button onclick="buyProduct(document.getElementById('modalTitle').textContent)" class="w-full bg-surgeon text-black font-bold py-3 md:py-4 rounded-full hover:scale-105 transition-transform text-sm md:text-base">
                         Buy Now
                     </button>
                 </div>
@@ -383,70 +441,66 @@
     </div>
 
     <!-- TRADE IN -->
-    <section id="trade" class="py-24 relative overflow-hidden">
+    <section id="trade" class="py-16 md:py-24 relative overflow-hidden">
         <div class="absolute inset-0 bg-gradient-to-r from-surgeon/10 to-transparent pointer-events-none"></div>
 
-        <div class="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
+        <div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col lg:flex-row items-center gap-8 md:gap-12">
 
             <!-- TEXT -->
-            <div class="lg:w-1/2 space-y-8">
-                <h2 class="font-display text-5xl md:text-6xl font-bold leading-tight">
+            <div class="lg:w-1/2 space-y-6 md:space-y-8 text-center lg:text-left">
+                <h2 class="font-display text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
                     Swap, Sell <br> & Upgrade.
                 </h2>
-                <p class="text-gray-400 text-lg">
-                    Got a dead device? We buy broken screens, water-damaged boards, and bent chassis. Trade in your old
-                    device for credit towards a new surgical-grade upgrade.
+                <p class="text-gray-400 text-base md:text-lg max-w-lg mx-auto lg:mx-0">
+                    Got a dead device? We buy broken screens, water-damaged boards, and bent chassis. Trade in your old device for credit towards a new surgical-grade upgrade.
                 </p>
 
-                <ul class="space-y-4">
-                    <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-check-circle text-surgeon"></i>
-                        <span>Instant Cash for Broken Devices</span>
+                <ul class="space-y-3 md:space-y-4 max-w-md mx-auto lg:mx-0">
+                    <li class="flex items-center gap-3 justify-center lg:justify-start">
+                        <i class="fa-solid fa-check-circle text-surgeon flex-shrink-0"></i>
+                        <span class="text-sm md:text-base">Instant Cash for Broken Devices</span>
                     </li>
-                    <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-check-circle text-surgeon"></i>
-                        <span>Secure Data Wiping Service</span>
+                    <li class="flex items-center gap-3 justify-center lg:justify-start">
+                        <i class="fa-solid fa-check-circle text-surgeon flex-shrink-0"></i>
+                        <span class="text-sm md:text-base">Secure Data Wiping Service</span>
                     </li>
-                    <li class="flex items-center gap-3">
-                        <i class="fa-solid fa-check-circle text-surgeon"></i>
-                        <span>Best Swap Rates in Ibadan</span>
+                    <li class="flex items-center gap-3 justify-center lg:justify-start">
+                        <i class="fa-solid fa-check-circle text-surgeon flex-shrink-0"></i>
+                        <span class="text-sm md:text-base">Best Swap Rates in Ibadan</span>
                     </li>
                 </ul>
 
-                <a href="mailto:uhammed666@gmail.com?subject=Trade-In Inquiry"
-                    class="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-surgeon transition-colors">
+                <a href="mailto:uhammed666@gmail.com?subject=Trade-In Inquiry" class="inline-block bg-white text-black px-6 md:px-8 py-3 md:py-4 rounded-full font-bold hover:bg-surgeon transition-colors text-sm md:text-base">
                     Get a Quote
                 </a>
             </div>
 
             <!-- VISUAL (FIXED SYSTEM) -->
-            <div class="lg:w-1/2 relative flex items-center justify-center gap-6">
+            <div class="lg:w-1/2 relative flex items-center justify-center gap-3 md:gap-6 w-full">
 
                 <!-- DAMAGED DEVICE -->
-                <div class="w-1/2 h-[420px] overflow-hidden rounded-2xl glass-panel border border-red-500/20">
+                <div class="w-[45%] h-64 md:h-80 lg:h-[420px] overflow-hidden rounded-2xl glass-panel border border-red-500/20 relative">
                     <img src="https://images.unsplash.com/photo-1746006084492-24a8fd02710a?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YnJva2VuJTIwaXBob25lfGVufDB8fDB8fHww"
                         alt="Broken iPhone with cracked screen"
                         class="w-full h-full object-cover opacity-70 hover:opacity-100 transition duration-500"
                         loading="lazy">
-                    <div
-                        class="absolute top-4 left-4 text-xs font-bold bg-red-500/20 text-red-400 px-3 py-1 rounded-full backdrop-blur">
+                    <div class="absolute top-2 md:top-4 left-2 md:left-4 text-xs font-bold bg-red-500/20 text-red-400 px-2 md:px-3 py-1 rounded-full backdrop-blur">
                         DAMAGED
                     </div>
                 </div>
 
                 <!-- CENTER ARROW -->
                 <div class="flex flex-col items-center justify-center">
-                    <i class="fa-solid fa-arrow-right-arrow-left text-4xl text-surgeon animate-pulse"></i>
+                    <i class="fa-solid fa-arrow-right-arrow-left text-2xl md:text-4xl text-surgeon animate-pulse"></i>
                 </div>
 
                 <!-- REPAIRED DEVICE -->
-                <div class="w-1/2 h-[420px] overflow-hidden rounded-2xl glass-panel border border-surgeon/20">
+                <div class="w-[45%] h-64 md:h-80 lg:h-[420px] overflow-hidden rounded-2xl glass-panel border border-surgeon/20 relative">
                     <img src="https://images.unsplash.com/photo-1611791484670-ce19b801d192?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGZpeGVkJTIwaXBob25lfGVufDB8fDB8fHww"
                         alt="Repaired iPhone in perfect condition"
                         class="w-full h-full object-cover opacity-80 hover:opacity-100 transition duration-500"
                         loading="lazy">
-                    <div
-                        class="absolute top-4 left-4 text-xs font-bold bg-surgeon/20 text-surgeon px-3 py-1 rounded-full backdrop-blur">
+                    <div class="absolute top-2 md:top-4 left-2 md:left-4 text-xs font-bold bg-surgeon/20 text-surgeon px-2 md:px-3 py-1 rounded-full backdrop-blur">
                         RESTORED
                     </div>
                 </div>
@@ -456,52 +510,51 @@
     </section>
 
     <!-- FOOTER -->
-    <footer id="contact" class="bg-black border-t border-white/10 pt-20 pb-10">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
-                <div>
-                    <div class="flex items-center gap-2 mb-6">
-                        <i class="fa-solid fa-microchip text-surgeon text-xl"></i>
-                        <span class="font-display font-bold text-2xl">OSMOTECH</span>
+    <footer id="contact" class="bg-black border-t border-white/10 pt-16 md:pt-20 pb-8 md:pb-10">
+        <div class="max-w-7xl mx-auto px-4 md:px-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 mb-12 md:mb-16">
+                <div class="text-center md:text-left">
+                    <div class="flex items-center gap-2 mb-4 md:mb-6 justify-center md:justify-start">
+                        <i class="fa-solid fa-microchip text-surgeon text-lg md:text-xl"></i>
+                        <span class="font-display font-bold text-xl md:text-2xl">OSMOTECH</span>
                     </div>
-                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
-                        The premier destination for high-end device surgery and retail in Oyo State. We combine
-                        medical-grade precision with digital speed.
+                    <p class="text-gray-500 text-sm leading-relaxed mb-4 md:mb-6 max-w-sm mx-auto md:mx-0">
+                        The premier destination for high-end device surgery and retail in Oyo State. We combine medical-grade precision with digital speed.
                     </p>
-                    <div class="flex gap-4">
-                        <a href="https://wa.me/2347067793175"
-                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all"><i
-                                class="fa-brands fa-whatsapp"></i></a>
-                        <a href="#"
-                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all"><i
-                                class="fa-brands fa-instagram"></i></a>
-                        <a href="#"
-                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all"><i
-                                class="fa-brands fa-twitter"></i></a>
+                    <div class="flex gap-4 justify-center md:justify-start">
+                        <a href="https://wa.me/2347067793175" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all">
+                            <i class="fa-brands fa-twitter"></i>
+                        </a>
                     </div>
                 </div>
 
-                <div>
-                    <h4 class="font-bold text-lg mb-6 text-white">Surgical Center</h4>
-                    <ul class="space-y-4 text-gray-400 text-sm">
-                        <li class="flex items-start gap-3">
-                            <i class="fa-solid fa-location-dot text-surgeon mt-1"></i>
-                            <span>Kajegbo St, Ibadan<br>200273, Oyo, Nigeria</span>
+                <div class="text-center md:text-left">
+                    <h4 class="font-bold text-base md:text-lg mb-4 md:mb-6 text-white">Surgical Center</h4>
+                    <ul class="space-y-3 md:space-y-4 text-gray-400 text-sm">
+                        <li class="flex items-start gap-3 justify-center md:justify-start">
+                            <i class="fa-solid fa-location-dot text-surgeon mt-1 flex-shrink-0"></i>
+                            <span class="text-center md:text-left">Kajegbo St, Ibadan<br>200273, Oyo, Nigeria</span>
                         </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fa-solid fa-envelope text-surgeon"></i>
-                            <a href="mailto:uhammed666@gmail.com" class="hover:text-surgeon">uhammed666@gmail.com</a>
+                        <li class="flex items-center gap-3 justify-center md:justify-start">
+                            <i class="fa-solid fa-envelope text-surgeon flex-shrink-0"></i>
+                            <a href="mailto:uhammed666@gmail.com" class="hover:text-surgeon break-all">uhammed666@gmail.com</a>
                         </li>
-                        <li class="flex items-center gap-3">
-                            <i class="fa-solid fa-clock text-surgeon"></i>
+                        <li class="flex items-center gap-3 justify-center md:justify-start">
+                            <i class="fa-solid fa-clock text-surgeon flex-shrink-0"></i>
                             <span>Mon - Sat: 9:00 AM - 7:00 PM</span>
                         </li>
                     </ul>
                 </div>
 
-                <div>
-                    <h4 class="font-bold text-lg mb-6 text-white">Operations</h4>
-                    <ul class="space-y-3 text-sm text-gray-400">
+                <div class="text-center md:text-left lg:col-span-1 md:col-span-2 lg:col-span-1">
+                    <h4 class="font-bold text-base md:text-lg mb-4 md:mb-6 text-white">Operations</h4>
+                    <ul class="space-y-2 md:space-y-3 text-sm text-gray-400">
                         <li><a href="#services" class="hover:text-surgeon transition-colors">Repair Diagnosis</a></li>
                         <li><a href="#inventory" class="hover:text-surgeon transition-colors">Shop Devices</a></li>
                         <li><a href="#trade" class="hover:text-surgeon transition-colors">Sell Your Device</a></li>
@@ -510,10 +563,9 @@
                 </div>
             </div>
 
-            <div
-                class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
-                <p>&copy; 2024 Osmotech î-Surgeon. All rights reserved.</p>
-                <p>Engineered for Performance.</p>
+            <div class="border-t border-white/5 pt-6 md:pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
+                <p class="text-center md:text-left">&copy; 2024 Osmotech î-Surgeon. All rights reserved.</p>
+                <p class="text-center md:text-right">Engineered for Performance.</p>
             </div>
         </div>
     </footer>
@@ -801,10 +853,30 @@
 
         // --- 7. WHATSAPP BUY FUNCTION ---
         function buyProduct(productName) {
-            const message = encodeURIComponent(`I'm interested in buying.....`);
+            const message = encodeURIComponent(`I'm interested in buying ${productName}`);
             const whatsappUrl = `https://wa.me/2347067793175?text=${message}`;
             window.open(whatsappUrl, '_blank');
         }
+        
+        // --- 8. MOBILE MENU FUNCTIONALITY ---
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const closeMobileMenu = document.getElementById('closeMobileMenu');
+
+        mobileMenuBtn?.addEventListener('click', () => {
+            mobileMenu.classList.add('active');
+        });
+
+        closeMobileMenu?.addEventListener('click', () => {
+            mobileMenu.classList.remove('active');
+        });
+
+        // Close mobile menu when clicking on links
+        mobileMenu?.querySelectorAll('a').forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.remove('active');
+            });
+        });
         const modal = document.getElementById('quickViewModal');
         const closeModal = document.getElementById('closeModal');
 
