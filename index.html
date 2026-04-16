@@ -192,7 +192,32 @@
             .modal-content {
                 margin: 1rem;
                 max-height: 90vh;
-                overflow-y: auto;
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            #quickViewModal .flex {
+                height: 100%;
+            }
+            
+            #quickViewModal .overflow-y-auto {
+                flex: 1;
+                min-height: 0;
+            }
+        }
+
+        /* Ensure modal content is scrollable */
+        .modal-scroll {
+            max-height: calc(90vh - 2rem);
+            overflow-y: auto;
+        }
+
+        /* Fix for mobile viewport */
+        @media (max-width: 640px) {
+            .modal-content {
+                max-height: 95vh;
+                margin: 0.5rem;
             }
         }
 
@@ -402,39 +427,44 @@
     </section>
 
     <!-- QUICK VIEW MODAL -->
-    <div id="quickViewModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] hidden items-center justify-center px-4 md:px-6">
-        <div class="modal-content bg-[#0b0b0b] border border-white/10 rounded-3xl max-w-4xl w-full overflow-hidden relative shadow-2xl">
+    <div id="quickViewModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] hidden items-center justify-center p-4">
+        <div class="modal-content bg-[#0b0b0b] border border-white/10 rounded-3xl w-full max-w-4xl max-h-[90vh] overflow-hidden relative shadow-2xl">
 
             <!-- CLOSE -->
             <button id="closeModal" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-surgeon hover:text-black transition-all flex items-center justify-center">
                 <i class="fa-solid fa-xmark"></i>
             </button>
 
-            <div class="grid grid-cols-1 md:grid-cols-2">
+            <div class="flex flex-col md:grid md:grid-cols-2 h-full max-h-[90vh]">
 
                 <!-- IMAGE -->
-                <div class="h-64 md:h-[500px] overflow-hidden">
+                <div class="h-48 md:h-auto overflow-hidden flex-shrink-0">
                     <img id="modalImage" src="" alt="" class="w-full h-full object-cover">
                 </div>
 
                 <!-- DETAILS -->
-                <div class="p-6 md:p-8 flex flex-col justify-center">
-                    <span class="text-surgeon text-xs font-bold tracking-widest uppercase mb-2" id="modalCategory"></span>
+                <div class="p-4 md:p-8 flex flex-col justify-between overflow-y-auto">
+                    <div class="flex-1">
+                        <span class="text-surgeon text-xs font-bold tracking-widest uppercase mb-2 block" id="modalCategory"></span>
 
-                    <h2 id="modalTitle" class="font-display text-2xl md:text-4xl font-bold mb-4"></h2>
+                        <h2 id="modalTitle" class="font-display text-xl md:text-3xl lg:text-4xl font-bold mb-3 md:mb-4"></h2>
 
-                    <p id="modalPrice" class="text-xl md:text-2xl font-mono text-gray-300 mb-4 md:mb-6"></p>
+                        <p id="modalPrice" class="text-lg md:text-xl lg:text-2xl font-mono text-gray-300 mb-4 md:mb-6"></p>
 
-                    <p id="modalDescription" class="text-gray-400 leading-relaxed mb-4 md:mb-6 text-sm md:text-base"></p>
+                        <p id="modalDescription" class="text-gray-400 leading-relaxed mb-4 md:mb-6 text-sm md:text-base"></p>
 
-                    <div class="mb-6 md:mb-8">
-                        <h4 class="font-bold mb-3 md:mb-4 text-white text-sm md:text-base">Key Functionalities</h4>
-                        <ul id="modalFeatures" class="space-y-2 md:space-y-3 text-xs md:text-sm text-gray-300"></ul>
+                        <div class="mb-6 md:mb-8">
+                            <h4 class="font-bold mb-3 md:mb-4 text-white text-sm md:text-base">Key Features</h4>
+                            <ul id="modalFeatures" class="space-y-2 md:space-y-3 text-xs md:text-sm text-gray-300"></ul>
+                        </div>
                     </div>
 
-                    <button onclick="buyProduct(document.getElementById('modalTitle').textContent)" class="w-full bg-surgeon text-black font-bold py-3 md:py-4 rounded-full hover:scale-105 transition-transform text-sm md:text-base">
-                        Buy Now
-                    </button>
+                    <!-- Buy Button - Always visible at bottom -->
+                    <div class="mt-4 pt-4 border-t border-white/10">
+                        <button onclick="buyProduct(document.getElementById('modalTitle').textContent)" class="w-full bg-surgeon text-black font-bold py-3 md:py-4 rounded-full hover:scale-105 transition-transform text-sm md:text-base">
+                            Buy Now
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -777,11 +807,11 @@
 
             filtered.forEach((p, index) => {
                 const card = document.createElement('div');
-                card.className = 'group glass-panel rounded-2xl overflow-hidden relative hover:border-surgeon/50 transition-all duration-300';
+                card.className = 'group glass-panel rounded-2xl overflow-hidden relative hover:border-surgeon/50 transition-all duration-300 hover-lift';
 
-                // Using Semantic HTML Attributes for Accessibility & SEO
+                // Enhanced mobile-responsive card
                 card.innerHTML = `
-                    <div class="relative h-64 overflow-hidden">
+                    <div class="relative h-48 sm:h-56 md:h-64 overflow-hidden">
                         <img src="${p.img}" 
                              alt="${p.name}" 
                              class="w-full h-full object-cover product-img transition-transform duration-700 group-hover:scale-110"
@@ -791,27 +821,37 @@
                         >
                         <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
                             <button 
-    class="quick-view-btn bg-surgeon text-black font-bold px-6 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
-    data-id="${p.id}">
-    Quick View
-</button>
+                                class="quick-view-btn bg-surgeon text-black font-bold px-4 md:px-6 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300 text-sm md:text-base"
+                                data-id="${p.id}">
+                                Quick View
+                            </button>
                         </div>
-                        <div class="absolute top-4 right-4 bg-black/60 backdrop-blur text-xs font-bold px-2 py-1 rounded text-white">
+                        <div class="absolute top-2 md:top-4 right-2 md:right-4 bg-black/60 backdrop-blur text-xs font-bold px-2 py-1 rounded text-white">
                             ${p.cat.toUpperCase()}
                         </div>
                     </div>
-                    <div class="p-6">
-                        <h3 class="font-display font-bold text-lg mb-2 group-hover:text-surgeon transition-colors">${p.name}</h3>
+                    <div class="p-4 md:p-6">
+                        <h3 class="font-display font-bold text-base md:text-lg mb-2 group-hover:text-surgeon transition-colors line-clamp-2">${p.name}</h3>
                         <div class="flex justify-between items-center">
-                            <span class="text-gray-300 font-mono">${p.price}</span>
-                            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-surgeon hover:text-black transition-colors">
+                            <span class="text-gray-300 font-mono text-sm md:text-base">${p.price}</span>
+                            <button class="quick-view-btn-small w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-surgeon hover:text-black transition-colors" data-id="${p.id}">
                                 <i class="fa-solid fa-arrow-right text-sm"></i>
-                            </div>
+                            </button>
                         </div>
                     </div>
                 `;
                 grid.appendChild(card);
-                card.querySelector('.quick-view-btn').addEventListener('click', () => {
+                
+                // Add event listeners for both quick view buttons
+                card.querySelector('.quick-view-btn').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openQuickView(p.id);
+                });
+                
+                card.querySelector('.quick-view-btn-small').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
                     openQuickView(p.id);
                 });
             });
@@ -882,40 +922,67 @@
 
         function openQuickView(productId) {
             const product = products.find(p => p.id == productId);
+            if (!product) return;
 
+            // Populate modal content
             document.getElementById('modalImage').src = product.img;
+            document.getElementById('modalImage').alt = product.name;
             document.getElementById('modalTitle').textContent = product.name;
             document.getElementById('modalCategory').textContent = product.cat.toUpperCase();
             document.getElementById('modalPrice').textContent = product.price;
-            document.getElementById('modalDescription').textContent = product.description;
+            document.getElementById('modalDescription').textContent = product.description || 'Premium device with exceptional quality and performance.';
 
+            // Populate features
             const featuresList = document.getElementById('modalFeatures');
             featuresList.innerHTML = '';
+            if (product.features && product.features.length > 0) {
+                product.features.forEach(feature => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <div class="flex items-center gap-3">
+                            <i class="fa-solid fa-check-circle text-surgeon flex-shrink-0"></i>
+                            <span>${feature}</span>
+                        </div>
+                    `;
+                    featuresList.appendChild(li);
+                });
+            }
 
-            product.features.forEach(feature => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-            <div class="flex items-center gap-3">
-                <i class="fa-solid fa-check-circle text-surgeon"></i>
-                <span>${feature}</span>
-            </div>
-        `;
-                featuresList.appendChild(li);
-            });
-
+            // Show modal
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            
+            // Prevent body scroll on mobile
+            document.body.style.overflow = 'hidden';
+            
+            // Add modal animation
+            gsap.fromTo('.modal-content', 
+                { scale: 0.8, opacity: 0 },
+                { scale: 1, opacity: 1, duration: 0.3, ease: 'power2.out' }
+            );
         }
 
         closeModal.addEventListener('click', () => {
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            document.body.style.overflow = 'auto'; // Restore body scroll
         });
 
-        window.addEventListener('click', (e) => {
+        // Close modal when clicking outside or on backdrop
+        modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
+                document.body.style.overflow = 'auto'; // Restore body scroll
+            }
+        });
+        
+        // Close modal with escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                document.body.style.overflow = 'auto';
             }
         });
 
