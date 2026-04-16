@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSMOTECH î-SURGEON | Elite Image System</title>
+    <link rel="icon"
+        href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23050505'/%3E%3Ccircle cx='50' cy='50' r='28' fill='%2300ffa3'/%3E%3Cpath d='M50 16v68M16 50h68M33 33l34 34M33 67l34-34' stroke='%23050505' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E"
+        type="image/svg+xml">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;600&display=swap"
+        rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'void': '#050505',
+                        'surgeon': '#00ffa3',
+                        'glass': 'rgba(255, 255, 255, 0.03)',
+                        'glass-border': 'rgba(255, 255, 255, 0.08)',
+                    },
+                    fontFamily: {
+                        'display': ['Space Grotesk', 'sans-serif'],
+                        'body': ['Inter', 'sans-serif'],
+                    },
+                    backgroundImage: {
+                        'grid-pattern': "linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px)",
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+            overflow-x: hidden;
+            cursor: none;
+        }
+
+        /* Custom Cursor */
+        .cursor-dot,
+        .cursor-outline {
+            position: fixed;
+            top: 0;
+            left: 0;
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        .cursor-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #00ffa3;
+        }
+
+        .cursor-outline {
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(0, 255, 163, 0.5);
+            transition: width 0.2s, height 0.2s;
+        }
+
+        /* Loading Screen */
+        .loader {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .loader-text {
+            font-family: 'Space Grotesk';
+            font-size: 1.5rem;
+            color: #00ffa3;
+            letter-spacing: 2px;
+        }
+
+        .loader-bar {
+            width: 200px;
+            height: 2px;
+            background: #222;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-progress {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0%;
+            background: #00ffa3;
+        }
+
+        /* Glassmorphism */
+        .glass-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+        }
+
+        /* Typography */
+        .text-glow {
+            text-shadow: 0 0 20px rgba(0, 255, 163, 0.3);
+        }
+
+        /* Image Masking */
+        .mask-image-clip {
+            clip-path: polygon(0 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        /* Image Fallback Styling */
+        .product-img {
+            background-color: #111;
+            /* Dark placeholder bg while loading */
+            transition: transform 0.7s ease;
+        }
+    </style>
+</head>
+
+<body class="font-body selection:bg-surgeon selection:text-black">
+
+    <!-- Custom Cursor -->
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <!-- Loader -->
+    <div class="loader">
+        <div class="loader-text">INITIALIZING SURGEON...</div>
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 px-6 py-6 transition-all duration-300" id="navbar">
+        <div class="max-w-7xl mx-auto flex justify-between items-center glass-panel rounded-full px-8 py-4">
+            <a href="#" class="flex items-center gap-2 group">
+                <i
+                    class="fa-solid fa-microchip text-surgeon text-2xl group-hover:rotate-180 transition-transform duration-700"></i>
+                <div class="flex flex-col">
+                    <span class="font-display font-bold text-xl tracking-tighter leading-none">OSMOTECH</span>
+                    <span class="text-[10px] text-gray-400 tracking-[0.2em] uppercase">î-Surgeon</span>
+                </div>
+            </a>
+
+            <div class="hidden md:flex gap-8 text-sm font-medium text-gray-300">
+                <a href="#services" class="hover:text-surgeon transition-colors">Surgery</a>
+                <a href="#inventory" class="hover:text-surgeon transition-colors">Inventory</a>
+                <a href="#trade" class="hover:text-surgeon transition-colors">Trade-In</a>
+                <a href="#contact" class="hover:text-surgeon transition-colors">Contact</a>
+            </div>
+
+            <a href="mailto:uhammed666@gmail.com"
+                class="hidden md:block bg-surgeon text-black px-6 py-2 rounded-full font-bold text-sm hover:bg-white transition-colors">
+                Book Repair
+            </a>
+        </div>
+    </nav>
+
+    <!-- HERO -->
+    <header class="relative h-screen w-full overflow-hidden flex items-center justify-center">
+        <div class="absolute inset-0 z-0">
+            <!-- Stable Tech Background -->
+            <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2670&auto=format&fit=crop"
+                alt="Technology"
+                class="hero-zoom-img w-full h-[120%] object-cover filter brightness-50 grayscale opacity-80">
+        </div>
+
+        <div class="absolute inset-0 bg-gradient-to-t from-void via-transparent to-transparent z-10"></div>
+
+        <div class="relative z-20 text-center px-4 max-w-4xl hero-content">
+            <div
+                class="inline-block border border-surgeon/30 text-surgeon px-4 py-1 rounded-full text-xs font-bold tracking-widest mb-6 uppercase backdrop-blur-md">
+                Micro-Soldering Specialists
+            </div>
+            <h1 class="font-display text-6xl md:text-8xl font-bold leading-tight mb-6">
+                WE RESURRECT <br>
+                <span
+                    class="text-transparent bg-clip-text bg-gradient-to-r from-surgeon to-white text-glow">TECHNOLOGY</span>
+            </h1>
+            <p class="text-gray-400 text-lg md:text-xl mb-10 max-w-2xl mx-auto leading-relaxed">
+                Premium iPhone & Laptop surgery in Ibadan. From Baseband repair to Face ID restoration. We don't just
+                fix; we engineer.
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center items-center">
+                <a href="#inventory"
+                    class="bg-white text-black px-8 py-4 rounded-full font-bold text-lg hover:scale-105 transition-transform">
+                    Shop Apple Gear
+                </a>
+                <a href="#services"
+                    class="glass-panel text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-surgeon/10 hover:border-surgeon transition-all flex items-center gap-2">
+                    <i class="fa-solid fa-stethoscope"></i> View Surgical Services
+                </a>
+            </div>
+        </div>
+
+        <div class="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 animate-bounce">
+            <i class="fa-solid fa-chevron-down text-surgeon text-xl"></i>
+        </div>
+    </header>
+
+    <!-- SERVICES -->
+    <section id="services" class="py-24 bg-void relative">
+        <div class="absolute inset-0 bg-grid-pattern bg-[length:40px_40px] opacity-[0.05] pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-6 relative z-10">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-16">
+                <div>
+                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Precision <span
+                            class="text-surgeon">Surgery</span></h2>
+                    <p class="text-gray-400 max-w-lg">Hardware-level repairs for "unfixable" devices. Using
+                        professional-grade microscopes and soldering stations.</p>
+                </div>
+                <a href="#contact"
+                    class="text-surgeon underline underline-offset-4 decoration-surgeon/30 hover:decoration-surgeon transition-all">Diagnostics
+                    Available &rarr;</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Service 1 -->
+                <div
+                    class="glass-panel p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-fingerprint text-8xl"></i>
+                    </div>
+                    <div
+                        class="w-14 h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-6 text-surgeon text-2xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-fingerprint"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold mb-3">Face ID Repair</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                        Dot projector flex cable replacement and True Camera module restoration. Restore biometric
+                        security with OEM precision.
+                    </p>
+                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY:
+                        HIGH</span>
+                </div>
+
+                <!-- Service 2 -->
+                <div
+                    class="glass-panel p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-wifi text-8xl"></i>
+                    </div>
+                    <div
+                        class="w-14 h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-6 text-surgeon text-2xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-wifi"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold mb-3">Baseband Fix</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                        No Signal? IMEI null? We perform CPU-level jumper work and Baseband IC replacements to restore
+                        cellular connectivity.
+                    </p>
+                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY:
+                        EXPERT</span>
+                </div>
+
+                <!-- Service 3 -->
+                <div
+                    class="glass-panel p-8 rounded-2xl group hover:border-surgeon/50 transition-all duration-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i class="fa-solid fa-bolt text-8xl"></i>
+                    </div>
+                    <div
+                        class="w-14 h-14 bg-surgeon/10 rounded-xl flex items-center justify-center mb-6 text-surgeon text-2xl group-hover:scale-110 transition-transform">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="font-display text-2xl font-bold mb-3">Tristar / Charging IC</h3>
+                    <p class="text-gray-400 text-sm leading-relaxed mb-4">
+                        Sudden battery drain? Not charging? We replace the Tristar and Tigris power management chips
+                        directly on the logic board.
+                    </p>
+                    <span class="text-xs font-mono text-surgeon border border-surgeon/20 px-2 py-1 rounded">DIFFICULTY:
+                        MEDIUM</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- INVENTORY (Elite Image System) -->
+    <section id="inventory" class="py-24 bg-[#080808]">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <span class="text-surgeon font-mono text-sm tracking-widest uppercase">Certified Pre-Owned & New</span>
+                <h2 class="font-display text-4xl md:text-5xl font-bold mt-2">The Arsenal</h2>
+            </div>
+
+            <!-- Filters -->
+            <div class="flex flex-wrap justify-center gap-4 mb-12" id="filters">
+                <button
+                    class="filter-btn active px-6 py-2 rounded-full border border-surgeon/30 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
+                    data-filter="all">All Devices</button>
+                <button
+                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
+                    data-filter="iphone">iPhone</button>
+                <button
+                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
+                    data-filter="macbook">MacBook</button>
+                <button
+                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
+                    data-filter="ipad">iPad</button>
+                <button
+                    class="filter-btn px-6 py-2 rounded-full border border-white/10 text-sm font-bold hover:bg-surgeon hover:text-black transition-all"
+                    data-filter="watch">Watch</button>
+            </div>
+
+            <!-- Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="product-grid">
+                <!-- Products injected via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- QUICK VIEW MODAL -->
+    <div id="quickViewModal"
+        class="fixed inset-0 bg-black/80 backdrop-blur-md z-[9999] hidden items-center justify-center px-6">
+        <div
+            class="bg-[#0b0b0b] border border-white/10 rounded-3xl max-w-4xl w-full overflow-hidden relative shadow-2xl">
+
+            <!-- CLOSE -->
+            <button id="closeModal"
+                class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-white/10 hover:bg-surgeon hover:text-black transition-all flex items-center justify-center">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2">
+
+                <!-- IMAGE -->
+                <div class="h-[500px] overflow-hidden">
+                    <img id="modalImage" src="" alt="" class="w-full h-full object-cover">
+                </div>
+
+                <!-- DETAILS -->
+                <div class="p-8 flex flex-col justify-center">
+                    <span class="text-surgeon text-xs font-bold tracking-widest uppercase mb-2"
+                        id="modalCategory"></span>
+
+                    <h2 id="modalTitle" class="font-display text-4xl font-bold mb-4"></h2>
+
+                    <p id="modalPrice" class="text-2xl font-mono text-gray-300 mb-6"></p>
+
+                    <p id="modalDescription" class="text-gray-400 leading-relaxed mb-6"></p>
+
+                    <div>
+                        <h4 class="font-bold mb-4 text-white">Key Functionalities</h4>
+                        <ul id="modalFeatures" class="space-y-3 text-sm text-gray-300"></ul>
+                    </div>
+
+                    <button onclick="buyProduct('${p.name}')"
+                        class="mt-8 bg-surgeon text-black font-bold py-4 rounded-full hover:scale-105 transition-transform">
+                        Buy Now
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRADE IN -->
+    <section id="trade" class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-surgeon/10 to-transparent pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-6 flex flex-col lg:flex-row items-center gap-12">
+
+            <!-- TEXT -->
+            <div class="lg:w-1/2 space-y-8">
+                <h2 class="font-display text-5xl md:text-6xl font-bold leading-tight">
+                    Swap, Sell <br> & Upgrade.
+                </h2>
+                <p class="text-gray-400 text-lg">
+                    Got a dead device? We buy broken screens, water-damaged boards, and bent chassis. Trade in your old
+                    device for credit towards a new surgical-grade upgrade.
+                </p>
+
+                <ul class="space-y-4">
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-check-circle text-surgeon"></i>
+                        <span>Instant Cash for Broken Devices</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-check-circle text-surgeon"></i>
+                        <span>Secure Data Wiping Service</span>
+                    </li>
+                    <li class="flex items-center gap-3">
+                        <i class="fa-solid fa-check-circle text-surgeon"></i>
+                        <span>Best Swap Rates in Ibadan</span>
+                    </li>
+                </ul>
+
+                <a href="mailto:uhammed666@gmail.com?subject=Trade-In Inquiry"
+                    class="inline-block bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-surgeon transition-colors">
+                    Get a Quote
+                </a>
+            </div>
+
+            <!-- VISUAL (FIXED SYSTEM) -->
+            <div class="lg:w-1/2 relative flex items-center justify-center gap-6">
+
+                <!-- DAMAGED DEVICE -->
+                <div class="w-1/2 h-[420px] overflow-hidden rounded-2xl glass-panel border border-red-500/20">
+                    <img src="https://images.unsplash.com/photo-1746006084492-24a8fd02710a?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8YnJva2VuJTIwaXBob25lfGVufDB8fDB8fHww"
+                        alt="Broken iPhone with cracked screen"
+                        class="w-full h-full object-cover opacity-70 hover:opacity-100 transition duration-500"
+                        loading="lazy">
+                    <div
+                        class="absolute top-4 left-4 text-xs font-bold bg-red-500/20 text-red-400 px-3 py-1 rounded-full backdrop-blur">
+                        DAMAGED
+                    </div>
+                </div>
+
+                <!-- CENTER ARROW -->
+                <div class="flex flex-col items-center justify-center">
+                    <i class="fa-solid fa-arrow-right-arrow-left text-4xl text-surgeon animate-pulse"></i>
+                </div>
+
+                <!-- REPAIRED DEVICE -->
+                <div class="w-1/2 h-[420px] overflow-hidden rounded-2xl glass-panel border border-surgeon/20">
+                    <img src="https://images.unsplash.com/photo-1611791484670-ce19b801d192?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjB8fGZpeGVkJTIwaXBob25lfGVufDB8fDB8fHww"
+                        alt="Repaired iPhone in perfect condition"
+                        class="w-full h-full object-cover opacity-80 hover:opacity-100 transition duration-500"
+                        loading="lazy">
+                    <div
+                        class="absolute top-4 left-4 text-xs font-bold bg-surgeon/20 text-surgeon px-3 py-1 rounded-full backdrop-blur">
+                        RESTORED
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="bg-black border-t border-white/10 pt-20 pb-10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-16">
+                <div>
+                    <div class="flex items-center gap-2 mb-6">
+                        <i class="fa-solid fa-microchip text-surgeon text-xl"></i>
+                        <span class="font-display font-bold text-2xl">OSMOTECH</span>
+                    </div>
+                    <p class="text-gray-500 text-sm leading-relaxed mb-6">
+                        The premier destination for high-end device surgery and retail in Oyo State. We combine
+                        medical-grade precision with digital speed.
+                    </p>
+                    <div class="flex gap-4">
+                        <a href="https://wa.me/2347067793175"
+                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all"><i
+                                class="fa-brands fa-whatsapp"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all"><i
+                                class="fa-brands fa-instagram"></i></a>
+                        <a href="#"
+                            class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-surgeon hover:text-black transition-all"><i
+                                class="fa-brands fa-twitter"></i></a>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-white">Surgical Center</h4>
+                    <ul class="space-y-4 text-gray-400 text-sm">
+                        <li class="flex items-start gap-3">
+                            <i class="fa-solid fa-location-dot text-surgeon mt-1"></i>
+                            <span>Kajegbo St, Ibadan<br>200273, Oyo, Nigeria</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-envelope text-surgeon"></i>
+                            <a href="mailto:uhammed666@gmail.com" class="hover:text-surgeon">uhammed666@gmail.com</a>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i class="fa-solid fa-clock text-surgeon"></i>
+                            <span>Mon - Sat: 9:00 AM - 7:00 PM</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h4 class="font-bold text-lg mb-6 text-white">Operations</h4>
+                    <ul class="space-y-3 text-sm text-gray-400">
+                        <li><a href="#services" class="hover:text-surgeon transition-colors">Repair Diagnosis</a></li>
+                        <li><a href="#inventory" class="hover:text-surgeon transition-colors">Shop Devices</a></li>
+                        <li><a href="#trade" class="hover:text-surgeon transition-colors">Sell Your Device</a></li>
+                        <li><a href="#" class="hover:text-surgeon transition-colors">Warranty Policy</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div
+                class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-gray-600">
+                <p>&copy; 2024 Osmotech î-Surgeon. All rights reserved.</p>
+                <p>Engineered for Performance.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- LOGIC SCRIPT -->
+    <script>
+        gsap.from('.modal-content', {
+            scale: 0.8,
+            opacity: 0,
+            duration: 0.4
+        });
+        // --- 1. LOADER ANIMATION ---
+        window.addEventListener('load', () => {
+            const tl = gsap.timeline();
+
+            tl.to('.loader-progress', { width: '100%', duration: 1.5, ease: 'power2.inOut' })
+                .to('.loader-text', { opacity: 0, duration: 0.5 }, '-=0.5')
+                .to('.loader-bar', { height: 0, duration: 0.3 })
+                .to('.loader', { y: '-100%', duration: 0.8, ease: 'power4.inOut' });
+
+            initHeroAnimation();
+        });
+
+        // --- 2. IMMERSIVE ZOOM HERO ---
+        function initHeroAnimation() {
+            gsap.to('.hero-zoom-img', {
+                scale: 1,
+                duration: 3,
+                ease: 'power2.out',
+                scrollTrigger: {
+                    trigger: 'header',
+                    start: 'top top',
+                    end: 'bottom top',
+                    scrub: true
+                }
+            });
+
+            gsap.from('.hero-content > *', {
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: 'power3.out',
+                delay: 2.2
+            });
+        }
+
+        // --- 3. CUSTOM CURSOR ---
+        const cursorDot = document.querySelector('.cursor-dot');
+        const cursorOutline = document.querySelector('.cursor-outline');
+
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top = `${posY}px`;
+
+            cursorOutline.animate({
+                left: `${posX}px`,
+                top: `${posY}px`
+            }, { duration: 500, fill: 'forwards' });
+        });
+
+        // --- 4. FALLBACK & IMAGE SYSTEM CONFIG ---
+
+        // Strict Semantic Fallbacks (Category Specific)
+        const FALLBACK_IMAGES = {
+            iphone: "https://images.unsplash.com/photo-1592750475338-74b7b21085ab?q=80&w=600&auto=format&fit=crop", // Generic iPhone
+            macbook: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=600&auto=format&fit=crop", // Generic Mac
+            ipad: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=600&auto=format&fit=crop", // Generic iPad
+            watch: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=600&auto=format&fit=crop", // Generic Watch
+            default: "https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=600&auto=format&fit=crop" // Generic Tech
+        };
+
+        /**
+         * Mandatory Error Handler
+         * Swaps broken images to category-specific fallbacks
+         */
+        function handleImageError(imgElement, category) {
+            console.warn(`Image failed for ${category}, swapping to fallback.`);
+            // Prevent infinite loops
+            if (!imgElement.dataset.fallbackTriggered) {
+                imgElement.src = FALLBACK_IMAGES[category] || FALLBACK_IMAGES.default;
+                imgElement.dataset.fallbackTriggered = "true";
+                // Add a slight visual cue that a fallback is used (optional)
+                imgElement.style.opacity = "0.8";
+            }
+        }
+
+        /**
+         * Product Data with Strict Semantic Image Mapping
+         * Using specific Unsplash IDs that are verified to match product names.
+         */
+        const products = [
+            // IPHONES (Specific Models)
+            {
+                id: 1,
+                name: "iPhone 15 Pro Max",
+                cat: "iphone",
+                price: "₦1,200,000",
+                img: "https://images.unsplash.com/photo-1709114108061-7a3b648eba80?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTh8fElwaG9uZSUyMDE1JTIwUHJvJTIwTWF4fGVufDB8fDB8fHww",
+                description: "Titanium-crafted flagship iPhone with powerful A17 Pro chip, cinematic camera system, and all-day battery life.",
+                features: [
+                    "6.7-inch Super Retina XDR Display",
+                    "A17 Pro Chip",
+                    "48MP Triple Camera",
+                    "Face ID Security",
+                    "USB-C Fast Charging"
+                ]
+            },
+            {
+                id: 2, name: "iPhone 15 Pro", cat: "iphone", price: "₦950,000",
+                img: "https://images.unsplash.com/photo-1709178295038-acbeec786fcf?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8SXBob25lJTIwMTUlMjBQcm98ZW58MHx8MHx8fDA%3D",
+                description: "Professional-grade iPhone with titanium design, advanced camera controls, and lightning-fast performance.",
+                features: ["6.1-inch Super Retina XDR Display", "A17 Pro Chip", "48MP Pro Camera System", "Action Button", "USB-C Connectivity"]
+            },
+            {
+                id: 3, name: "iPhone 15 Plus", cat: "iphone", price: "₦880,000",
+                img: "data:image/webp;base64,UklGRjQLAABXRUJQVlA4ICgLAADQPwCdASq7ALsAPkEcjEOioaGVCW5AKAQEtIHYDyqIVWhl3d/rv7N7Xu6ucbZL8ADVZWWPIfUz/xnrI/4nls+nf/L7i/80/rf/N9cP2C/tx7Jn7DoY7DMLb/SllKrh23mZhdOB8CHXbxFIsLER8OuTMOBedQ4a0E00gnB3bXau1A9V+LSE32Q1IVxPfucZzTHmzFmUO8+ESIsSrmwcEwH2qlLfcMGcwX0mvPIQbwzktso9KQYlDRrSbJHzgkGcRqiefXI74X60EGeD3bGTKYcHJqLfzvwr40j14a49IPB/x14gDyFiA3MTr4jDPXbb7unp367V6Kr1WSUbmculGgR/K3uz/IxtI0AaSi1iFsWYlRdC6tMxLhTzEjCAwwQaq5T2hlZ8kohcCTyh+fOjyZffIrc5GUCWu9sHao4qN07vOsOzXLHxMuk1jfc5mAzgOq7xGWIkrdxzWxky7JGL14isGH8De/3leZ7xE660ZlPOn501fZ+zG8P4dstz67eqnG1ChK/GONuQqVtK0Z9sVGh2+YyTJUFiSGMnYSRAfeKKMilBUE4dWGtmBQE5xUUYI026b4nHwpoLuqL9NB0tMT46fiG7E6pfE6B56UBJYfmTKYLeehBf80S50cBrU5VRQESwyExpYegKkcobyrcbHnUDMOneApoduMgL5cECny1g/AGcJwhrEdAA/v4kg3w9paoYvqG2nOVvD0MX/pbcaH8MXmRmr7W4Q1tEhk0V6EtZzbgflxzxdSQ+1pwB/L/De/mLLPVFY7TLXbg+e0HP2vn/6Myax/eDKdD+pjpqMD9OCXtIuaPz7P5qTRcQvJmx3ot7jtgFIduA6F1kiUH3iYxBbXiKmpK76gncrXDIh1oq2oxDY9ZoLm9vea4U3n0Z5Ii3kqUG6r0+XONsORlI99/Fp7bqmia+zgoXjibgN/jEpD2aYbh919mXgAUXlm9RBkjGbSmk9tB3pIeVIvOG97DkjRKxDP39RMRW7p9s65jT5kx81Nbd033ozRt77eWxNGr8kjQETs0rk2iAhHzfO5zPK0CwADGW6+cssRO5h3a5meDdQWP4cFBjTCVscbXAPruVY4/YFxL0s1laWwihekwA497yZ6bRxdEOn/AC8qalfA3QAz/hv++ZMMCjQnnWiYDtz88g35GpeDhaEK4HxzQuV04QurvXmbPv3k4cB0j1iQUIz1xdXkchMboBmLT6/0cgPdDCxTUaZ3hzfn38wXPIurjn6I7fK7obb2rt+ktBV3XP8SqpKFSCAhti0WvwwOAnB4/BjH/9xraC6snPW3+ped+ZQxQ9WUYbvWA/UT7D1tOp2wHudJxD+sv/fiIPqJWEiUaXdua6J0dg1lHsj/yA8ybV4Bzz3Y/E5dYFSv40ei0DB5w4lcAIVACi5sUOp9+YmKbyc195QDL6zkI6Z2XR48YkZi6F0C/ur1VRad8rJycFiKHtgZ95VFMKfwRGOh7Qgjpyhh2bC3MO4eGu+tvwjezCp/gCCQfp4AiCQpCVrJpGGLMOyJFdX87UMTGWPW4WIC99bopdCSY0z8YfVBH9R0vgMufUEqOW+xUtAjr60bW+8GrKcr/ssGZ28yZw44H2BOWmaUO1qOCH9ia5ZVyVYc72GsT9asbJ9gQcsL5sxuc5Cp/GWSsRdY5zEcUoRWFvNEFuScUklVFC7dWWyDGfF5yDlF+PiPF+EoAi+71oOgWj/9V4igT1tn5Rl+E4eR785RG1XPRTG2KJHvq9zXqHPzBisJcpOyFWSgknVJl+r4p+k34TQ98GyjcZFw7LH3W4GYzY1QoAy77Dbcva8308ddMNlCjPsvfWolljvcatyjKrMLCfpLfJk7taOUMn4rX3kgaljvlaSeKkXfT+fiyY+DiDQhWc5BSJh9OkD37IK0zV3T/3P5VQu4AMok6NJD+zv99xnIgii6jtec00w6Yn1mKb3xnkmRWbISK0uP7znzNgK0Ct5By/ajfjaj8HJGMy0H69llWeGGR8oXqTCZj/BnMV6C3NkkWYSTYiHaJiCZAF8xFlmm2ywGAtNSK1Ipo0gpojgpez/x3VmUmJuHHMkHMDbuswbz0lrTrFRRn5YomUCe3/RvD6S0d4AiO536BBZ6lCmgUjydPN22wWPlFoiYIF+tEWOFnmEW/fWqYGh5vpecepP15PChALtK4CdQixJReV3uPF6eMzfcx5hI0mYVyBTZd79iv/mr88T5AvwbuRnjGowEjNrVZu/1jyWlYGJuAV0MhcgE/957pKbK4UvG7gbqBrDAR3QZkoudkcwiG0J0XUuqA6BovFPRa/2WFwU655BZuhnX0y98xjRkaS4K0tAO0IROvQ5eD7H9qE3fpPZBMRNXc/YBLVD+HN8UKLGcwC1GoTxkwlCMcklYFKuRxskc48n6FXoI7tACE451czUNhOarlf34yjyMnWFi9nVA2Cv9HB/B85akU2CVkWdlq61fuZQtdzwHCMv1RaV0+GH7QZMZLkfSKf5nYT7XKO56A94PRChsT6A8wH0GT0UrAWjAI7L3JLhxMGpsxL+Y9HR14veJN1VaJarcmGw7gTG6l6Skng8jaj4N5ZOnO8DxdPu49r7j0/lWiOVS9fcXEM4wKTcFrnH5yEByyUr41U0ZMdG3XiLvLr+2d1GdkAmwcMTk3m0KoMu5uFuQRkIStyOzC+/ANoFLt2Me1n1pd/54LEBXBkXK9zEa8TCnW7x/5Ko6cgVVP+les4W+vkx6IMicRJe5i/V5YnnHTy43DE6kt0y2bhiPaoRPOvVhCwa/t8HvKYd6QuTyPFCR2CuE4oCYwNfj3KPsFbd3/D+Dh0Hgi7t4udnzBbyHDE+GQSORMoLhTPpqL1tPAtAXwbHXPXPYHFd71MxSRSKc7Vphi/N15HNQbVaT2JSa+h4+C5LxSksOzZcGA6bLeAECUZZegGdfh32DFceOkduFKiaEWwdLBpgaZb9FHpDX16oj5REy4g2rLPGK+awgDnkfFxRHdJlI9q6gJ3zrA1WgibV2Ghz12esIgAP4QNHVktRvPnx/l7qk0dgsb11ze9D+3DKdWIVbVIvEjAUKd9syyB09kcrCLts+hCfIpoEQLBWCFohY9snpMtG+dcOQRdolI0lsKc6OeoRx8QQorjXObCbeEZT1l2ItkovPhKthMHVGvy4hoXXX712Z5PORTv99dfgiSmLQ0Cg4fN3gRHU0oltDbRzuCEbWUzMJ+4N0S8QAG+ETFJsdokeVWemKT4TTCAeCDUMvK6KT4GpWDA2rbfAcSwYEUaQbnsXMZ6NH3bYEFv+lz0v+2jIfe7XKlUXTL5vB8RMNSafOd66lAyk9F+ZfewfBaPZFFNFaAcrAdhJsbWEnvIEBMByVnnXqJwegVkjWOtnSPwV/tvabrP+p3GZxV9dI1dgFVYLnu/7rl0fxyy7J7TPm6wOwqaTWwGjYVbcI/HP+Tkyh91opuhyyszI+85vWkCXoJ1+qoK6SkyEk815f+VmcxLTovj6Rq5znpZ8x9Nv/hnP7rdPKdgib8YD9xxXplZmb+SEL5VdI3cVFWj7NdyH1/51dwyjVdrU4FINvpEEx+OBpbS9Qt8FTNvYI5IMje/mo2uLIFItcMyVQXqfuC4NJ5zv+z0fk6L1Iv53wMFn1RDKsxLvT8o2tCMPtQkBxM8Q+2GourPrz+BAc3vvj5GFOO+VmktRRNJPHi/iVbwAKxtxv8+/Jm05puPP7MTYmgupq9+0Yv/4ZG/VdwOpCZef8kOE//Grfw8/NncjHy8BL/T3/SKvftkgIzMXsTv8SczwjZyx0RTUkNdxGgoAcdiAAAAAAA=",
+                description: "Large-screen iPhone with vibrant colors, excellent battery life, and powerful A16 Bionic performance.",
+                features: ["6.7-inch Super Retina XDR Display", "A16 Bionic Chip", "48MP Main Camera", "Dynamic Island", "All-Day Battery Life"]
+            },
+            {
+                id: 4, name: "iPhone 14 Pro", cat: "iphone", price: "₦750,000",
+                img: "https://images.unsplash.com/photo-1678652197831-2d180705cd2c?q=80&w=600&auto=format&fit=crop",
+                description: "Pro iPhone with Dynamic Island, Always-On display, and professional photography capabilities.",
+                features: ["6.1-inch ProMotion Display", "A16 Bionic Chip", "48MP Pro Camera", "Dynamic Island", "Always-On Display"]
+            },
+            {
+                id: 5, name: "iPhone 13 Pro", cat: "iphone", price: "₦520,000",
+                img: "https://images.unsplash.com/photo-1695578130391-929bdfff85d8?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8SXBob25lJTIwMTMlMjBQcm98ZW58MHx8MHx8fDA%3D",
+                description: "Proven Pro iPhone with cinematic video recording, macro photography, and exceptional build quality.",
+                features: ["6.1-inch ProMotion Display", "A15 Bionic Chip", "Triple Camera System", "Cinematic Mode", "ProRes Video"]
+            },
+            {
+                id: 6, name: "iPhone SE", cat: "iphone", price: "₦320,000",
+                img: "https://images.unsplash.com/photo-1565849904461-04a58ad377e0?q=80&w=600&auto=format&fit=crop",
+                description: "Compact iPhone with classic design, powerful A15 Bionic chip, and familiar Touch ID authentication.",
+                features: ["4.7-inch Retina HD Display", "A15 Bionic Chip", "12MP Camera", "Touch ID", "Wireless Charging"]
+            },
+
+            // MACBOOKS (Specific Models)
+            {
+                id: 7, name: "MacBook Pro 16\" M3", cat: "macbook", price: "₦2,800,000",
+                img: "https://sm.pcmag.com/t/pcmag_me/review/a/apple-macb/apple-macbook-pro-16-inch-2023-m3-max_cah1.1920.jpg",
+                description: "Ultimate creative powerhouse with M3 chip, stunning Liquid Retina XDR display, and professional-grade performance.",
+                features: ["16-inch Liquid Retina XDR", "M3 Pro/Max Chip", "Up to 128GB RAM", "8TB SSD Storage", "22-Hour Battery Life"]
+            },
+            {
+                id: 8, name: "MacBook Pro 14\" M3", cat: "macbook", price: "₦2,200,000",
+                img: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?q=80&w=600&auto=format&fit=crop",
+                description: "Compact pro laptop with M3 performance, brilliant display, and advanced connectivity for professionals.",
+                features: ["14-inch Liquid Retina XDR", "M3 Pro Chip", "Up to 64GB RAM", "Multiple Thunderbolt Ports", "18-Hour Battery"]
+            },
+            {
+                id: 9, name: "MacBook Air M2", cat: "macbook", price: "₦1,100,000",
+                img: "https://images.unsplash.com/photo-1569770218135-bea267ed7e84?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8TWFjQm9vayUyMEFpciUyME0yfGVufDB8fDB8fHww",
+                description: "Ultra-thin laptop with M2 chip efficiency, fanless design, and all-day battery for everyday computing.",
+                features: ["13.6-inch Liquid Retina Display", "M2 Chip", "Up to 24GB RAM", "Fanless Design", "18-Hour Battery Life"]
+            },
+
+            // IPADS (Specific Models)
+            {
+                id: 10, name: "iPad Pro 12.9\" M2", cat: "ipad", price: "₦1,100,000",
+                img: "https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?q=80&w=600&auto=format&fit=crop",
+                description: "Professional tablet with M2 chip power, Liquid Retina XDR display, and Apple Pencil hover technology.",
+                features: ["12.9-inch Liquid Retina XDR", "M2 Chip", "Apple Pencil Hover", "Thunderbolt Connectivity", "5G Cellular Option"]
+            },
+            {
+                id: 11, name: "iPad Air 5", cat: "ipad", price: "₦600,000",
+                img: "https://images.unsplash.com/photo-1585790050230-5dd28404ccb9?q=80&w=600&auto=format&fit=crop",
+                description: "Versatile iPad with M1 chip performance, vibrant display, and compatibility with Magic Keyboard.",
+                features: ["10.9-inch Liquid Retina Display", "M1 Chip", "12MP Ultra Wide Camera", "USB-C Port", "Magic Keyboard Support"]
+            },
+            {
+                id: 12, name: "iPad Mini 6", cat: "ipad", price: "₦420,000",
+                img: "data:image/jpeg;base64,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",
+                description: "Compact powerhouse with A15 Bionic chip, all-screen design, and Apple Pencil support for portability.",
+                features: ["8.3-inch Liquid Retina Display", "A15 Bionic Chip", "12MP Wide Camera", "Apple Pencil 2 Support", "All-Day Battery"]
+            },
+
+            // WATCHES (Specific Models)
+            {
+                id: 13, name: "Apple Watch Ultra", cat: "watch", price: "₦750,000",
+                img: "https://images.unsplash.com/photo-1434493789847-2f02dc6ca35d?q=80&w=600&auto=format&fit=crop",
+                description: "Rugged smartwatch built for extreme adventures with titanium case, precision GPS, and extended battery life.",
+                features: ["49mm Titanium Case", "Precision Dual-GPS", "Action Button", "36-Hour Battery", "100m Water Resistance"]
+            },
+            {
+                id: 14, name: "Apple Watch Series 9", cat: "watch", price: "₦550,000",
+                img: "https://images.unsplash.com/photo-1542496658-e33a6d0d50f6?q=80&w=600&auto=format&fit=crop",
+                description: "Advanced smartwatch with S9 chip, Double Tap gesture, and comprehensive health monitoring capabilities.",
+                features: ["45mm/41mm Options", "S9 SiP Chip", "Double Tap Gesture", "Blood Oxygen Monitoring", "ECG App"]
+            },
+            {
+                id: 15, name: "Apple Watch SE", cat: "watch", price: "₦280,000",
+                img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?q=80&w=600&auto=format&fit=crop",
+                description: "Essential smartwatch with core Apple Watch features, fitness tracking, and safety features at an accessible price.",
+                features: ["44mm/40mm Options", "S8 SiP Chip", "Crash Detection", "Fitness Tracking", "Family Setup Support"]
+            }
+        ];
+
+        const grid = document.getElementById('product-grid');
+
+        function renderProducts(category = 'all') {
+            grid.innerHTML = '';
+            const filtered = category === 'all' ? products : products.filter(p => p.cat === category);
+
+            filtered.forEach((p, index) => {
+                const card = document.createElement('div');
+                card.className = 'group glass-panel rounded-2xl overflow-hidden relative hover:border-surgeon/50 transition-all duration-300';
+
+                // Using Semantic HTML Attributes for Accessibility & SEO
+                card.innerHTML = `
+                    <div class="relative h-64 overflow-hidden">
+                        <img src="${p.img}" 
+                             alt="${p.name}" 
+                             class="w-full h-full object-cover product-img transition-transform duration-700 group-hover:scale-110"
+                             loading="lazy"
+                             decoding="async"
+                             onerror="handleImageError(this, '${p.cat}')"
+                        >
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm">
+                            <button 
+    class="quick-view-btn bg-surgeon text-black font-bold px-6 py-2 rounded-full transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300"
+    data-id="${p.id}">
+    Quick View
+</button>
+                        </div>
+                        <div class="absolute top-4 right-4 bg-black/60 backdrop-blur text-xs font-bold px-2 py-1 rounded text-white">
+                            ${p.cat.toUpperCase()}
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-display font-bold text-lg mb-2 group-hover:text-surgeon transition-colors">${p.name}</h3>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-300 font-mono">${p.price}</span>
+                            <div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center hover:bg-surgeon hover:text-black transition-colors">
+                                <i class="fa-solid fa-arrow-right text-sm"></i>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+                card.querySelector('.quick-view-btn').addEventListener('click', () => {
+                    openQuickView(p.id);
+                });
+            });
+
+            // Refresh ScrollTrigger for new elements
+            ScrollTrigger.refresh();
+        }
+
+        // --- 5. FILTER LOGIC ---
+        const filters = document.querySelectorAll('.filter-btn');
+        filters.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filters.forEach(b => {
+                    b.classList.remove('active', 'bg-surgeon', 'text-black', 'border-surgeon/30');
+                    b.classList.add('border-white/10');
+                });
+                btn.classList.add('active', 'bg-surgeon', 'text-black', 'border-surgeon/30');
+                btn.classList.remove('border-white/10');
+
+                renderProducts(btn.dataset.filter);
+            });
+        });
+
+        // --- 6. PARALLAX SECTIONS ---
+        gsap.utils.toArray('.glass-panel').forEach(panel => {
+            gsap.from(panel, {
+                y: 100,
+                opacity: 0,
+                duration: 1,
+                scrollTrigger: {
+                    trigger: panel,
+                    start: 'top 85%',
+                }
+            });
+        });
+
+        // Initialize
+        renderProducts();
+
+        // --- 7. WHATSAPP BUY FUNCTION ---
+        function buyProduct(productName) {
+            const message = encodeURIComponent(`I'm interested in buying.....`);
+            const whatsappUrl = `https://wa.me/2347067793175?text=${message}`;
+            window.open(whatsappUrl, '_blank');
+        }
+        const modal = document.getElementById('quickViewModal');
+        const closeModal = document.getElementById('closeModal');
+
+        function openQuickView(productId) {
+            const product = products.find(p => p.id == productId);
+
+            document.getElementById('modalImage').src = product.img;
+            document.getElementById('modalTitle').textContent = product.name;
+            document.getElementById('modalCategory').textContent = product.cat.toUpperCase();
+            document.getElementById('modalPrice').textContent = product.price;
+            document.getElementById('modalDescription').textContent = product.description;
+
+            const featuresList = document.getElementById('modalFeatures');
+            featuresList.innerHTML = '';
+
+            product.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-check-circle text-surgeon"></i>
+                <span>${feature}</span>
+            </div>
+        `;
+                featuresList.appendChild(li);
+            });
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        closeModal.addEventListener('click', () => {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        });
+
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        });
+
+    </script>
+</body>
+
+</html>
